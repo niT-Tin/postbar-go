@@ -11,4 +11,5 @@ type Comment struct {
 	PublishDate time.Time `bson:"publish_date"`
 	ReplyNUm    int64     `bson:"reply_num"`
 	Contents    Content   `bson:"contents"`
+	LikeNums    int64     `bson:"like_num"`
 }
