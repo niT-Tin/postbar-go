@@ -6,7 +6,12 @@ import (
 )
 
 const (
-	MongoDBName = "postbar"
+	MongoDBName              = "postbar"
+	CommentCollectionName    = "comment"
+	ContentCollectionName    = "content"
+	SinglePostCollectionName = "single_post"
+	PostBarCollectionName    = "post"
+	UserCollectionName       = "user"
 )
 
 var (
