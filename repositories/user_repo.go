@@ -53,6 +53,9 @@ func NewUserRepository(db, collectionName string, u1 *mongo.Client) IUserReposit
 }
 
 func (u *UserRepository) Insert(user *datamodels.User) error {
+	// 实现id自增
+	db.UserIdInc += 1
+	user.Userid = db.UserIdInc
 	_, err2 := u.collection.InsertOne(context.TODO(), user)
 	if err2 != nil {
 		reciteErrorInRepo(&err2)
