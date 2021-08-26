@@ -6,6 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"postbar/datamodels"
+	"postbar/db"
 	"postbar/err"
 )
 
@@ -58,6 +59,9 @@ func NewContentRepository(dbs, cl string, m *mongo.Client) IContent {
 
 // Create 插入单个内容文档
 func (c *ContentRepository) Create(cnt *datamodels.Content) (*mongo.InsertOneResult, error) {
+	// 实现id自增
+	db.ContentIdInc += 1
+	cnt.ContentId = db.ContentIdInc
 	res, err2 := c.collection.InsertOne(context.TODO(), cnt)
 	if err2 != nil {
 		reciteErrorInRepo(&err2)
