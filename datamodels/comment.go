@@ -9,7 +9,7 @@ type Comment struct {
 	SubId       int64     `bson:"sub_id"`
 	ParentId    int64     `bson:"parent_id"`
 	PublishDate time.Time `bson:"publish_date"`
-	ReplyNUm    int64     `bson:"reply_num"`
+	ReplyNum    int64     `bson:"reply_num"`
 	Contents    Content   `bson:"contents"`
 	LikeNums    int64     `bson:"like_num"`
 }
