@@ -50,6 +50,9 @@ func NewSinglePostRepository(db string, collectionName string, s *mongo.Client) 
 }
 
 func (s *SinglePostRepository) Create(post *datamodels.SinglePost) error {
+	// 实现id自增
+	db.SinglePostIdInc += 1
+	post.PosterId = db.SinglePostIdInc
 	_, err2 := s.collection.InsertOne(context.TODO(), post)
 	if err2 != nil {
 		reciteErrorInRepo(&err2)
