@@ -3,10 +3,12 @@ package repositories
 import (
 	"context"
 	"errors"
+	"github.com/ahmetb/go-linq/v3"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"postbar/datamodels"
 	"postbar/err"
+	"sync"
 )
 
 type IComment interface {
@@ -17,6 +19,8 @@ type IComment interface {
 	Delete(*datamodels.Comment) error
 	GetContentInCommentById(int64) (*datamodels.Content, error)
 	CheckRight() bool
+	IncreaseLikeNumByOne(int64) bool
+	IncreaseLikeNum(int64, int64) bool
 }
 
 type CommentRepository struct {
@@ -24,12 +28,13 @@ type CommentRepository struct {
 	collectionName string
 	mongodb        *mongo.Client
 	collection     *mongo.Collection
+	sync.Mutex
 }
 
 func (m *CommentRepository) CheckRight() bool {
 	if len(m.collectionName) == 0 || len(m.db) == 0 || m.mongodb == nil { //简单检查参数是否正确
 		err2 := errors.New("new content failed")
-		err.Reciteerr(&err2) //错误则将错误信息写入数据库
+		err.ReciteErr(&err2) //错误则将错误信息写入数据库
 		return false
 	}
 	return true
@@ -58,10 +63,10 @@ func (m *CommentRepository) Insert(comment *datamodels.Comment) (*mongo.InsertOn
 	return one, nil
 }
 
-//func (m *CommentRepository) GetAllInSinglePost(singlePostId int64) ([]datamodels.Comment, error) {
+// GetOneById func (m *CommentRepository) GetAllInSinglePost(singlePostId int64) ([]datamodels.Comment, error) {
 //
 //}
-
+// 通过id获得评论
 func (m *CommentRepository) GetOneById(commentId int64) (*datamodels.Comment, error) {
 	one := m.collection.FindOne(context.TODO(), bson.M{"comment_id": commentId})
 	if one == nil {
@@ -103,4 +108,30 @@ func (m *CommentRepository) GetContentInCommentById(commentid int64) (*datamodel
 		reciteErrorInRepo(&err2)
 	}
 	return &id.Contents, nil
+}
+
+func (m *CommentRepository) IncreaseLikeNumByOne(commentId int64) bool {
+	var i int64 = 1
+	m.Lock()
+	one, err2 := m.collection.UpdateOne(context.TODO(), bson.D{{"comment_id", commentId}}, bson.D{{"$inc", bson.D{{"like_num", i}}}})
+	m.Unlock()
+	if err2 != nil {
+		reciteErrorInRepo(&err2)
+		return false
+	}
+	if one.ModifiedCount != 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
+func (m *CommentRepository) IncreaseLikeNum(commentId, steps int64) bool {
+	bools := make([]bool, 0)
+	for i := 0; i < int(steps); i++ {
+		bools = append(bools, m.IncreaseLikeNumByOne(commentId))
+	}
+	return linq.From(bools).All(func(i interface{}) bool {
+		return i.(bool)
+	})
 }
