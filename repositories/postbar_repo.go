@@ -28,7 +28,7 @@ type PostBarRepository struct {
 func (p *PostBarRepository) CheckRight() bool {
 	if len(p.collectionName) == 0 || len(p.db) == 0 || p.mongodb == nil { //简单检查参数是否正确
 		err2 := errors.New("new content failed")
-		err.Reciteerr(&err2) //错误则将错误信息写入数据库
+		err.ReciteErr(&err2) //错误则将错误信息写入数据库
 		return false
 	}
 	return true
