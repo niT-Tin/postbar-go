@@ -1,24 +1,35 @@
 package utils
 
 import (
+	"errors"
 	"github.com/joho/godotenv"
-	"log"
 	"os"
+	"postbar/datamodels"
+	err2 "postbar/err"
 )
 
-func GetMongoENV() (string, string, error) {
-	err := godotenv.Load("../envs/mongo.env")
-	if err != nil {
-		log.Printf("error while loading environment: %v", err)
-		return "", "", err
-		// TODO: 将错误信息写入RabbitMQ队列，进而将错误消息一个一个插入mysql数据库
+func init() {
+	err := godotenv.Load("../envs/dbs.env")
+	err2.Reciteerr(&err)
+}
+
+func GetMySqlENV() *datamodels.MySQLENV {
+	return &datamodels.MySQLENV{
+		User:     os.Getenv("MYSQL_USER"),
+		Password: os.Getenv("MYSQL_PASSWORD"),
+		Host:     os.Getenv("MYSQL_HOST"),
+		Port:     os.Getenv("MYSQL_PORT"),
+		DBName:   os.Getenv("MYSQL_DBNAME"),
 	}
-	host := os.Getenv("HOST")
-	port := os.Getenv("PORT")
+}
+
+func GetMongoENV() (string, string, error) {
+	host := os.Getenv("MONGO_HOST")
+	port := os.Getenv("MONGO_PORT")
 	if len(host) == 0 || len(port) == 0 {
-		log.Printf("error while getting environment: %v", err)
-		// TODO: 将错误信息写入RabbitMQ队列，进而将错误消息一个一个插入mysql数据库
-		return "", "", err
+		errs := errors.New("error while getting environment")
+		err2.Reciteerr(&errs)
+		return "", "", errs
 	}
 	return host, port, nil
 }
