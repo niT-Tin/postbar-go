@@ -29,7 +29,7 @@ func reciteErrorInRepo(errI *error) bool {
 	var err2 error
 	if errI != nil {
 		err2 = errors.New((*errI).Error() + " on repo")
-		return err.Reciteerr(&err2)
+		return err.ReciteErr(&err2)
 	}
 	return false
 }
@@ -37,7 +37,7 @@ func reciteErrorInRepo(errI *error) bool {
 func (c *ContentRepository) CheckRight() bool {
 	if len(c.collectionName) == 0 || len(c.db) == 0 || c.mongodb == nil { //简单检查参数是否正确
 		err2 := errors.New("new content failed")
-		err.Reciteerr(&err2) //错误则将错误信息写入数据库
+		err.ReciteErr(&err2) //错误则将错误信息写入数据库
 		return false
 	}
 	return true
@@ -94,11 +94,11 @@ func (c *ContentRepository) GetOneById(commentId int64) (*datamodels.Content, er
 	one := c.collection.FindOne(context.TODO(), bson.M{"comment_id": commentId})
 	if one == nil {
 		err2 := errors.New("findOneById error res is nil")
-		err.Reciteerr(&err2)
+		err.ReciteErr(&err2)
 	}
 	d := &datamodels.Content{}
 	err2 := one.Decode(d)
-	if err.Reciteerr(&err2) {
+	if err.ReciteErr(&err2) {
 		return nil, err2
 	}
 	return d, nil
