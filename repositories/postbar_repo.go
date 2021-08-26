@@ -6,6 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"postbar/datamodels"
+	"postbar/db"
 	"postbar/err"
 )
 
@@ -48,6 +49,9 @@ func NewPostBarRepository(db, collectionName string, p *mongo.Client) IPostBar {
 }
 
 func (p *PostBarRepository) Create(bar *datamodels.PostBar) error {
+	// 实现id自增
+	db.PostBarIdInc += 1
+	bar.PostBarId = db.PostBarIdInc
 	_, err2 := p.collection.InsertOne(context.TODO(), bar)
 	if err2 != nil {
 		reciteErrorInRepo(&err2)
