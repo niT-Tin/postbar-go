@@ -6,6 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"postbar/datamodels"
+	"postbar/db"
 	"postbar/err"
 )
 
@@ -16,12 +17,16 @@ type IUserRepository interface {
 	GetOneById(int64) *datamodels.User
 	GetAllUsers() []datamodels.User
 	CheckRight() bool
+	GetUserByAccount(string) (*datamodels.User, error)
+	PostCrud() ISinglePostRepository
+	CommentCrud() IComment
+	PostBarCrud() IPostBar
 }
 
 func (u *UserRepository) CheckRight() bool {
 	if len(u.collectionName) == 0 || len(u.db) == 0 || u.mongodb == nil { //简单检查参数是否正确
 		err2 := errors.New("new content failed")
-		err.Reciteerr(&err2) //错误则将错误信息写入数据库
+		err.ReciteErr(&err2) //错误则将错误信息写入数据库
 		return false
 	}
 	return true
@@ -101,4 +106,31 @@ func (u *UserRepository) GetAllUsers() []datamodels.User {
 		return nil
 	}
 	return us
+}
+
+func (u *UserRepository) GetUserByAccount(account string) (*datamodels.User, error) {
+	one := u.collection.FindOne(context.TODO(), bson.D{{"account", account}})
+	if e := one.Err(); e != nil {
+		reciteErrorInRepo(&e)
+		return nil, e
+	}
+	t := &datamodels.User{}
+	err2 := one.Decode(t)
+	if err2 != nil {
+		reciteErrorInRepo(&err2)
+		return nil, err2
+	}
+	return t, nil
+}
+
+func (u *UserRepository) PostCrud() ISinglePostRepository {
+	return NewSinglePostRepository(db.MongoDBName, db.SinglePostCollectionName, u.mongodb)
+}
+
+func (u *UserRepository) CommentCrud() IComment {
+	return NewCommentRepository(db.MongoDBName, db.CommentCollectionName, u.mongodb)
+}
+
+func (u *UserRepository) PostBarCrud() IPostBar {
+	return NewPostBarRepository(db.MongoDBName, db.PostBarCollectionName, u.mongodb)
 }
