@@ -30,7 +30,7 @@ type SinglePostRepository struct {
 func (s *SinglePostRepository) CheckRight() bool {
 	if len(s.collectionName) == 0 || len(s.db) == 0 || s.mongodb == nil { //简单检查参数是否正确
 		err2 := errors.New("new content failed")
-		err.Reciteerr(&err2) //错误则将错误信息写入数据库
+		err.ReciteErr(&err2) //错误则将错误信息写入数据库
 		return false
 	}
 	return true
