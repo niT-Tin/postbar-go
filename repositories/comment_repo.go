@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"postbar/datamodels"
+	"postbar/db"
 	"postbar/err"
 	"sync"
 )
@@ -55,10 +56,13 @@ func NewCommentRepository(db, collectionName string, c *mongo.Client) IComment {
 
 // Insert 插入单条评论
 func (m *CommentRepository) Insert(comment *datamodels.Comment) (*mongo.InsertOneResult, error) {
-	one, err := m.collection.InsertOne(context.TODO(), comment)
-	if err != nil {
-		reciteErrorInRepo(&err)
-		return nil, err
+	//实现自增id
+	db.CommentIdInc += 1
+	comment.CommentId = db.CommentIdInc
+	one, err3 := m.collection.InsertOne(context.TODO(), comment)
+	if err3 != nil {
+		reciteErrorInRepo(&err3)
+		return nil, err3
 	}
 	return one, nil
 }
