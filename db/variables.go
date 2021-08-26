@@ -18,4 +18,11 @@ var (
 	MongoClient *mongo.Client
 	MysqlDB     *gorm.DB
 	MysqlUrl    string
+
+	// 用于ID自增
+	ContentIdInc    int64
+	CommentIdInc    int64
+	SinglePostIdInc int64
+	PostBarIdInc    int64
+	UserIdInc       int64
 )
